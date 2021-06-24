@@ -24,7 +24,7 @@ Starfuzz currently works with:
 ```
 Example:
 ```
-$ starscan.py -u http://example.com -w common-directories.txt
+$ starfuzz.py -u http://example.com -w common-directories.txt
 ```
 
 # Installation
