@@ -19,5 +19,5 @@ Starfuzz currently works with:
 
 # Installation
 ```
-git clone https://github.com/sunflower-exe/
+git clone https://github.com/sunflower-exe/starfuzz
 ```
