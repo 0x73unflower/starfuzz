@@ -17,6 +17,16 @@ Starfuzz currently works with:
 * Linux / Unix
 * Windows
 
+# Usage
+```
+  -u URL | Specify URL (HTTP / HTTPS)
+  -w WORDLIST | Specify a wordlist
+```
+Example:
+```
+$ starscan.py -u http://example.com -w common-directories.txt
+```
+
 # Installation
 ```
 git clone https://github.com/sunflower-exe/starfuzz
