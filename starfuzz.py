@@ -26,7 +26,7 @@ class Options:
         self.UNKNOWN = f'{Style.BRIGHT}{Fore.MAGENTA}[{Fore.WHITE}~{Fore.MAGENTA}]{Style.RESET_ALL}'
 
     def parseArguments(self, *args):
-        parser = argparse.ArgumentParser(add_help=True, description='starfuzz 1.0')
+        parser = argparse.ArgumentParser(add_help=True, description='starfuzz 0.2')
         parser.add_argument('-u', dest='URL', help='Specify URL (HTTP / HTTPS)')
         parser.add_argument('-d', dest='subdomain', help='Scan for Subdomains')
         parser.add_argument('-w', dest='wordlist', help='Specify a Wordlist' )
