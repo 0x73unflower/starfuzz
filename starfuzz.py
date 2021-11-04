@@ -2,8 +2,6 @@ import requests
 import argparse
 import platform
 import subprocess
-import datetime
-from requests import status_codes
 from requests.models import InvalidURL
 from colorama import init, Fore, Style
 
@@ -16,82 +14,94 @@ LOGO = '''
 ╚══════╝   ╚═╝   ╚═╝  ╚═╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚══════╝╚══════╝
 '''
 
-# Colors
-WARNING = f'{Style.BRIGHT}{Fore.RED}[{Fore.YELLOW}+{Fore.RED}]{Style.RESET_ALL}'
-SUCCESS = f'{Style.BRIGHT}{Fore.GREEN}[{Fore.CYAN}+{Fore.GREEN}]{Style.RESET_ALL}'
-UNKNOWN = f'{Style.BRIGHT}{Fore.MAGENTA}[{Fore.WHITE}~{Fore.MAGENTA}]{Style.RESET_ALL}'
-
-class StarFuzz:
+class Options:
     def __init__(self):
-        self.targetURL = ''
-        self.cleanURL = ''
-        self.reqURL = ''
-        self.suppliedWordlist = ''
-        self.saveOutput = False
-        self.isVerbose = False
-        self.word = ''
-    
-    def configTerminal(self):
-        initialOS = platform.system()
-        if initialOS == 'Windows':
-            subprocess.call('cls', shell=True)
-            # colorama for Windows
-            init(autoreset=True)
-        else:
-            subprocess.call('clear', shell=True)
-        print(LOGO)
+        self.targetURL = False
+        self.wordlistFile = ''
+        self.verboseMode = False
+        self.hostOS = ''
+        self.foundDirectories = []
+        self.WARNING = f'{Style.BRIGHT}{Fore.RED}[{Fore.YELLOW}+{Fore.RED}]{Style.RESET_ALL}'
+        self.SUCCESS = f'{Style.BRIGHT}{Fore.GREEN}[{Fore.CYAN}+{Fore.GREEN}]{Style.RESET_ALL}'
+        self.UNKNOWN = f'{Style.BRIGHT}{Fore.MAGENTA}[{Fore.WHITE}~{Fore.MAGENTA}]{Style.RESET_ALL}'
 
     def parseArguments(self, *args):
         parser = argparse.ArgumentParser(add_help=True, description='starfuzz 1.0')
-        parser.add_argument('-u', dest='url', help='Specify URL (HTTP / HTTPS)', required=True)
-        parser.add_argument('-w', dest='wordlist', help='Specify a wordlist', required=True)
-        parser.add_argument('-v', dest='verboseMode', help='Enable verbose mode', action='store_true', required=False)
-        parser.add_argument('-s', dest='saveOutput', help='Saves output to a text file. ', action='store_true', required=False)
+        parser.add_argument('-u', dest='URL', help='Specify URL (HTTP / HTTPS)')
+        parser.add_argument('-d', dest='subdomain', help='Scan for Subdomains')
+        parser.add_argument('-w', dest='wordlist', help='Specify a Wordlist' )
+        parser.add_argument('-v', dest='verboseOn', help='Enable Verbose mode', action='store_true')
         args = parser.parse_args()
         
-        self.targetURL = args.url
-        self.suppliedWordlist = args.wordlist
-        self.isVerbose = args.verboseMode
-        self.saveOutput = args.saveOutput
+        self.targetURL = args.URL
+        self.targetSUB = args.subdomain
+        self.wordlistFile = args.wordlist
+        self.verboseMode = args.verboseOn
+
+    def configTerminal(self):
+        self.hostOS = platform.system()
+        if self.hostOS == 'Windows':
+            subprocess.call('cls', shell=True)
+            init(autoreset=True)
+        elif self.hostOS == 'Linux' or 'Darwin':
+            subprocess.call('clear', shell=True)
+        else:
+            print(f'{self.WARNING} Unknown OS! Continuing...')
 
     def openWordlist(self):
         try:
-            with open(self.suppliedWordlist, 'r') as wordlistFile:
-                for word in wordlistFile:
-                    word = word.strip()
-                    self.scanDomain(word)
+            with open(self.wordlistFile, 'r') as suppliedWordlist:
+                for word in suppliedWordlist:
+                    if self.targetURL:
+                        self.scanDomain(word.strip())
+                    if self.targetSUB:
+                        self.scanSubdomain(word.strip())
         except FileNotFoundError:
-            print(f'{WARNING} {self.suppliedWordlist} could NOT be found!')
+            print(f'{self.WARNING} \'{self.wordlistFile}\' could NOT be found!')
     
+    def verboseScan(self):
+        print(f'{self.UNKNOWN} Scanning: {self.cleanURL}')
+
+class DirectoryScan(Options):
     def scanDomain(self, word):
-        foundDirectories = []
         try:
-            self.cleanURL = self.targetURL + word
+            self.cleanURL = self.targetURL + word 
             self.reqURL = requests.get(self.cleanURL)
             if self.reqURL.status_code == 200:
-                print(f'{SUCCESS} Found: {self.cleanURL}')
-                foundDirectories.append(self.cleanURL)
+                self.foundDirectories.append(self.cleanURL)
+                print(f'{self.SUCCESS} Found: {self.cleanURL}')
             else:
-                if self.isVerbose:
-                    print(f'{UNKNOWN} Scanning: {self.cleanURL}')
-                if self.reqURL.status_code == 200:
-                    print(f'{SUCCESS} Found: {self.cleanURL}')
-            if self.saveOutput:
-                with open(f'starfuzz.txt', 'a+') as outputFile:
-                    for directory in foundDirectories:
-                        outputFile.write(directory)
-                        outputFile.write('\n')
+                pass
+            if self.verboseMode:
+                self.verboseScan()
         except InvalidURL:
-            print(f'{WARNING} {self.targetURL} does NOT exist.')
-        except requests.exceptions.ConnectionError as connError:
-            print(f'{WARNING} Connection Error! - {connError}')
+                print(f'{self.WARNING} {self.cleanURL} does NOT exist.')
+
+    def scanSubdomain(self, word):
+        try:
+            self.cleanURL = self.targetSUB[:8] + word + '.' + self.targetSUB[8:]
+            self.reqURL = requests.get(self.cleanURL)
+            if self.reqURL.status_code == 200:
+                print(f'{self.SUCCESS} Found: {self.cleanURL}')
+                self.foundDirectories.append(self.cleanURL)
+            else:
+                pass
+            if self.verboseMode:
+                self.verboseScan()
+        except InvalidURL:
+            print(f'{self.WARNING} {self.cleanURL} does NOT exist.')
+        except requests.ConnectionError:
+            pass
 
 if __name__ == '__main__':
     try:
-        starfuzz = StarFuzz()
-        starfuzz.configTerminal()
-        starfuzz.parseArguments()
-        starfuzz.openWordlist()
-        starfuzz.scanDomain()
+        dScan = DirectoryScan()
+        dScan.configTerminal()
+        dScan.parseArguments()
+        dScan.openWordlist()
+        if dScan.targetURL:
+            dScan.scanDomain()
+        if dScan.targetSUB:
+            dScan.scanSubdomain()
     except KeyboardInterrupt:
-        print(f'{WARNING} [!] Exiting!')
+        print(f'Exiting!')
