@@ -23,10 +23,17 @@ Starfuzz currently works with:
   -w WORDLIST | Specify a wordlist
 ```
 Example:
-```
-$ starfuzz.py -u http://example.com -w common-directories.txt
-```
 
+Scan Directories:
+-----------------
+```
+$ starfuzz.py -u https://www.example.com/ -w common-directories.txt
+```
+Scan Subdomains:
+----------------
+```
+$ starfuzz.py -d https://example.com/ -w common-subdomains.txt
+```
 # Installation
 ```
 git clone https://github.com/sunflower-exe/starfuzz
