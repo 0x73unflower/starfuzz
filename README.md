@@ -24,8 +24,6 @@ Starfuzz currently works with:
   -v VERBOSE | Verbose mode
   -w WORDLIST | Specify a wordlist
 ```
-Example:
-
 Scan Directories:
 -----------------
 ```
