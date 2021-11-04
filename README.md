@@ -20,6 +20,8 @@ Starfuzz currently works with:
 # Usage
 ```
   -u URL | Specify URL (HTTP / HTTPS)
+  -d DOMAIN | Scan for subdomains
+  -v VERBOSE | Verbose mode
   -w WORDLIST | Specify a wordlist
 ```
 Example:
