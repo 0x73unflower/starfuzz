@@ -2,7 +2,7 @@ import requests
 import argparse
 import platform
 import subprocess
-import datetime
+from datetime import datetime
 from requests import status_codes
 from requests import exceptions
 from requests.models import InvalidURL
@@ -74,8 +74,18 @@ class Main:
     def verboseScan(self):
         print(f'{self.UNKNOWN} Scanning: {self.cleanURL}')
 
+    def showInfo(self):
+        time = datetime.now()
+        currentTime = time.strftime('%H:%M:%S') 
+        print('-' * 66)
+        print(f' Scan started at: {currentTime}')
+        print(f' Operating System: {self.hostOS}')
+        print(f' Words in {self.wordlistFile}: {len(self.words)}')
+        print('-' * 66, '\n')
+
     def scanDomain(self):
         try:
+            self.showInfo()
             for directory in self.words:
                 self.cleanURL = self.targetURL + directory
                 self.reqURL = requests.get(self.cleanURL)
@@ -91,6 +101,7 @@ class Main:
     
     def scanSudomain(self):
         try:
+            self.showInfo()
             for directory in self.words:
                 self.cleanURL = self.targetSUB[:8] + directory + '.' + self.targetSUB[8:]
                 self.reqURL = requests.get(self.cleanURL)
