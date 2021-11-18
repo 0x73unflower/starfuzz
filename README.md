@@ -14,15 +14,17 @@ starfuzz makes it easier to find them. It's lightweight and made with Python.
 
 # Technologies
 Starfuzz currently works with:
-* Linux / Unix
+* Linux
 * Windows
 
 # Usage
 ```
-  -u URL | Specify URL (HTTP / HTTPS)
-  -d DOMAIN | Scan for subdomains
-  -v VERBOSE | Verbose mode
-  -w WORDLIST | Specify a wordlist
+  -h, --help    show this help message and exit
+  -u DIRECTORY  Specify URL (HTTP / HTTPS)
+  -d SUBDOMAIN  Scan for Subdomains
+  -w WORDLIST   Specify a Wordlist
+  -v            Enable Verbose mode
+  -s            Saves output to a given file.
 ```
 Scan Directories:
 -----------------
